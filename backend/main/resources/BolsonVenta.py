@@ -1,5 +1,7 @@
 from flask_restful import Resource
-from flask import request
+from flask import request, jsonify
+from .. import db
+from main.models import BolsonModel
 
 BOLSONESVENTA = {
     1: {'name': 'bolsónventa1'},
@@ -10,10 +12,10 @@ BOLSONESVENTA = {
 
 class BolsonesVenta(Resource):
     def get(self):
-        return BOLSONESVENTA
+        bolsones = db.session.query(BolsonModel).all()
+        return jsonify([bolson.to_json() for bolson in bolsones])
 
 class BolsonVenta(Resource):
     def get(self, id):
-        if int(id) in BOLSONESVENTA:
-            return BOLSONESVENTA[int(id)]
-        return '', 404
+        bolson = db.session.query(BolsonModel).get_or_404(id)
+        return bolson.to_json()

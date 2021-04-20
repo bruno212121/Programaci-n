@@ -1,5 +1,8 @@
 from flask_restful import Resource
-from flask import request
+from flask import request, jsonify
+from .. import db
+from main.models import BolsonModel
+from datetime import datetime
 
 BOLSONESPENDIENTES = {
     1: {'name': 'bolsonpendiente1'},
@@ -9,28 +12,29 @@ BOLSONESPENDIENTES = {
 
 class BolsonPendiente(Resource):
     def get(self,id):
-        if int(id) in BOLSONESPENDIENTES:
-            return BOLSONESPENDIENTES[int(id)]
-        return '', 404
+        bolson = db.session.query(BolsonModel).get_or_404(id)
+        return bolson.to_json()
     def delete(self,id):
-        if int(id) in BOLSONESPENDIENTES:
-            del BOLSONESPENDIENTES[int(id)]
-            return '', 204
-        return '', 404
+        bolson = db.session.query(BolsonModel).get_or_404(id)
+        db.session.delete(bolson)
+        db.session.commit()
+        return '', 204
     def put(self,id):
-        if int(id) in BOLSONESPENDIENTES:
-            bolson = BOLSONESPENDIENTES[int(id)]
-            data = request.get_json()
-            bolson.update(data)
-            return bolson, 201
-        return '', 404
+        bolson = db.session.query(BolsonModel).get_or_404(id)
+        data = request.get_json().items()
+        for key, value in data:
+            setattr(bolson, key, value)
+        db.session.add(bolson)
+        db.session.commit()
+        return bolson.to_json(), 201
 
 class BolsonesPendientes(Resource):
     def get(self):
-        return BOLSONESPENDIENTES
+        bolsones = db.session.query(BolsonModel).all()
+        return jsonify([bolson.to_json() for bolson in bolsones])
     def post(self):
-        bolson = request.get_json()
-        id = int(max(BOLSONESPENDIENTES.keys())) + 1
-        BOLSONESPENDIENTES[id] = bolson
-        return BOLSONESPENDIENTES[id], 201
+        bolson = BolsonModel.from_json(request.get_json())
+        db.session.add(bolson)
+        db.session.commit()
+        return bolson.to_json(), 201
 
