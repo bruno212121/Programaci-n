@@ -12,21 +12,21 @@ BOLSONESPENDIENTES = {
 
 class BolsonPendiente(Resource):
     def get(self,id):
-        bolson = db.session.query(BolsonModel).get_or_404(id)
-        return bolson.to_json()
+        bolsonpendiente = db.session.query(BolsonModel).get_or_404(id)
+        return bolsonpendiente.to_json()
     def delete(self,id):
-        bolson = db.session.query(BolsonModel).get_or_404(id)
-        db.session.delete(bolson)
+        bolsonpendiente = db.session.query(BolsonModel).get_or_404(id)
+        db.session.delete(bolsonpendiente)
         db.session.commit()
         return '', 204
     def put(self,id):
-        bolson = db.session.query(BolsonModel).get_or_404(id)
+        bolsonpendiente = db.session.query(BolsonModel).get_or_404(id)
         data = request.get_json().items()
         for key, value in data:
-            setattr(bolson, key, value)
-        db.session.add(bolson)
+            setattr(bolsonpendiente, key, value)
+        db.session.add(bolsonpendiente)
         db.session.commit()
-        return bolson.to_json(), 201
+        return bolsonpendiente.to_json(), 201
 
 class BolsonesPendientes(Resource):
     def get(self):
@@ -37,4 +37,3 @@ class BolsonesPendientes(Resource):
         db.session.add(bolson)
         db.session.commit()
         return bolson.to_json(), 201
-

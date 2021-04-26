@@ -1,10 +1,12 @@
 from .. import db
+import datetime as dt
 
 class Bolson(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(100), nullable=False)
-    aprobado = db.Column(db.String(100), nullable=False)
+    aprobado = db.Column(db.Boolean, nullable=False)
     fecha = db.Column(db.DateTime, nullable=False)
+
     def __repr__(self):
         return '<bolson: %r %r %r >' % (self.nombre, self.aprobado, self.fecha)
 
@@ -12,8 +14,8 @@ class Bolson(db.Model):
         bolson_json = {
             'id': self.id,
             'nombre': str(self.nombre),
-            'aprobado': str(self.aprobado),
-            'fecha': self.fecha.isoformat(),
+            'aprobado': self.aprobado,
+            'fecha': self.fecha.strftime('%Y-%m-%d'),
 
         }
         return bolson_json
@@ -23,7 +25,7 @@ class Bolson(db.Model):
         id = bolson_json.get('id')
         nombre = bolson_json.get('nombre')
         aprobado = bolson_json.get('aprobado')
-        fecha = dt.datetime.strtime(bolson_json.get('fecha'), '%y/%m/%d')
+        fecha = dt.datetime.strptime(bolson_json.get('fecha'), '%Y-%m-%d')
         return Bolson(id=id,
                       nombre=nombre,
                       aprobado=aprobado,

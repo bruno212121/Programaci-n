@@ -6,6 +6,7 @@ class Cliente(db.Model):
     apellido = db.Column(db.String(100), nullable=False)
     telefono = db.Column(db.String(100), nullable=False)
     mail = db.Column(db.String(100), nullable=False)
+
     def __repr__(self):
         return '<Professor: %r %r %r %r >' % (self.nombre, self.apellido, self.telefono, self.mail)
     #Convertir objeto en JSON
