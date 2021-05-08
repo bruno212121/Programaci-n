@@ -3,11 +3,6 @@ from flask import request, jsonify
 from .. import db
 from main.models import ProveedorModel
 
-PROVEEDORES = {
-    1: {'name': 'proveedor1'},
-    2: {'name': 'proveedor2'},
-    3: {'name': 'proveedor3'}
-}
 
 class Proveedor(Resource):
     def get(self, id):

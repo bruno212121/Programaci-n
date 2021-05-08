@@ -3,11 +3,6 @@ from flask import request, jsonify
 from .. import db
 from main.models import ClienteModel
 
-CLIENTES = {
-    1: {'name': 'cliente1'},
-    2: {'name': 'cliente2'},
-    3: {'name': 'cliente3'}
-}
 
 class Cliente(Resource):
     def get(self, id):

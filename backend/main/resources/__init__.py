@@ -21,3 +21,6 @@ from .Producto import Productos as ProductosResource
 
 from .Proveedor import Proveedor as ProveedorResource
 from .Proveedor import Proveedores as ProveedoresResource
+
+from .ProductosBolsones import ProductoBolson as ProductoBolsonResource
+from .ProductosBolsones import ProductoBolsones as ProductoBolsonesResource
