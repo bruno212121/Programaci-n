@@ -26,10 +26,13 @@ class ProductoBolsones(Resource):
 
 
     def post(self):
-        productobolsones = ProductoBolsonModel.from_json(request.get_json())
-        db.session.add(productobolsones)
-        db.session.commit()
-        return productobolsones.to_json(), 201
+        try:
+            productobolsones = ProductoBolsonModel.from_json(request.get_json())
+            db.session.add(productobolsones)
+            db.session.commit()
+            return productobolsones.to_json(), 201
+        except:
+            return '', 404
 
 class ProductoBolson(Resource):
     def get(self, id):

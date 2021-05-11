@@ -3,19 +3,34 @@ from flask import request, jsonify
 from .. import db
 from main.models import BolsonModel
 
-BOLSONESVENTA = {
-    1: {'name': 'bolsónventa1'},
-    2: {'name': 'bolsónventa2'},
-    3: {'name': 'bolsónventa3'},
-    4: {'name': 'bolsonventa4'}
-}
 
 class BolsonesVenta(Resource):
     def get(self):
-        bolsones = db.session.query(BolsonModel).all()
-        return jsonify([bolson.to_json() for bolson in bolsones])
+        page = 1
+        per_page = 10
+        bolsones = db.session.query(BolsonModel)
+
+        if request.get_json():
+            filters = request.get_json().items()
+            for key, value in filters:
+                if key =="page":
+                    page = int(value)
+                if key =="per_page":
+                    per_page = int(value)
+        bolsones = bolsones.paginate(page, per_page, True, 30)
+
+        return jsonify({
+            'bolsonesventa': [bolson.to_json() for bolson in bolsones.items],
+            'total': bolsones.total,
+            'pages': bolsones.pages,
+            'page': page
+        })
+
 
 class BolsonVenta(Resource):
     def get(self, id):
-        bolson = db.session.query(BolsonModel).get_or_404(id)
-        return bolson.to_json()
+        bolsonventa = db.session.query(BolsonModel).get_or_404(id)
+        if bolsonventa.aprobado == 1:
+            return bolsonventa.to_json()
+        else:
+            return '', 404

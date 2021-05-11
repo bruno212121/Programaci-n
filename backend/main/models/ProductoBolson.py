@@ -2,7 +2,7 @@ from .. import db
 from . import ProductoModel, BolsonModel
 
 class ProductoBolson(db.Model):
-    id = db.Column(db.Integer, primary_Key=True)
+    id = db.Column(db.Integer,  primary_key=True)
     producto = db.relationship('Producto', back_populates="productobolsones", uselist=False, single_parent=True)
     productoId = db.Column(db.Integer, db.ForeignKey('producto.id'), nullable=False)
     bolson = db.relationship('Bolson', back_populates="productobolsones", uselist=False, single_parent=True)

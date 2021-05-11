@@ -3,11 +3,6 @@ from flask import request, jsonify
 from .. import db
 from main.models import BolsonModel
 
-BOLSONES = {
-    1: {'name': 'bolson1'},
-    2: {'name': 'bolson2'},
-    3: {'name': 'bolson3'}
-}
 
 class Bolson(Resource):
     def get(self, id):
@@ -16,5 +11,22 @@ class Bolson(Resource):
 
 class Bolsones(Resource):
     def get(self):
-        bolsones = db.session.query(BolsonModel).all()
-        return jsonify([bolson.to_json() for bolson in bolsones])
+
+        page: 1
+        per_page: 10
+        bolsones = db.session.query(BolsonModel)
+
+        if request.get_json():
+            filters = request.get_json().items()
+            for key, value in filters:
+                if key == "page":
+                    page = int(value)
+                if key == "per_page":
+                    per_page = int(value)
+        bolsones = bolsones.paginate(page, per_page, True, 30)
+
+        return jsonify({'bolsones': [bolson.to_json() for bolson in bolsones.items],
+                        'total': bolsones.total,
+                        'pages': bolsones.pages,
+                        'page': page
+                        })

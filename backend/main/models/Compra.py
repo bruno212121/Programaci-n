@@ -26,8 +26,8 @@ class Compra(db.Model):
     #Convertir JSON a objeto
     def from_json(compra_json):
         id = compra_json.get('id')
-        fechacompra = dt.datetime.strptime(compra_json.get('fechacompra'), '%Y-%m-%d')
         retirado = compra_json.get('retirado')
+        fechacompra = dt.datetime.strptime(compra_json.get('fechacompra'), '%Y-%m-%d')
         return Compra(id=id,
                     fechacompra=fechacompra,
                     retirado=retirado,
