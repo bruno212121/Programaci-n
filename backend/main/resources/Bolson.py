@@ -2,14 +2,20 @@ from flask_restful import Resource
 from flask import request, jsonify
 from .. import db
 from main.models import BolsonModel
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from main.auth.decorators import admin_required
 
 
 class Bolson(Resource):
+    #para obtener recurso
+    @admin_required
     def get(self, id):
         bolson = db.session.query(BolsonModel).get_or_404(id)
         return bolson.to_json()
 
 class Bolsones(Resource):
+    #para obtener la lista de los bolsones
+    @admin_required
     def get(self):
 
         page: 1

@@ -1,43 +1,82 @@
 from flask_restful import Resource
 from flask import request, jsonify
 from .. import db
-from main.models import ProveedorModel
-
+from main.models import UsuarioModel
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from main.auth.decorators import admin_required, proveedor_or_admin_required
 
 class Proveedor(Resource):
+    @proveedor_or_admin_required
     def get(self, id):
-        try:
-            proveedor = db.session.query(ProveedorModel).get_or_404(id)
-            return proveedor.to_json()
-        except:
-            return '', 404
+        current_user = get_jwt_identity()
+        proveedor = db.session.query(UsuarioModel).get_or_404(id)
+        if proveedor.role == 'proveedor':
+            if current_user['usuarioId'] == proveedor.id or current_user['role'] == 'admin':
+                try:
+                    return proveedor.to_json()
+                except:
+                    return '', 404
+            else:
+                return 'Unauthorized', 401
+        else:
+            return 'proveedor not found', 404
+
+    @admin_required
     def put(self, id):
-        proveedor = db.session.query(ProveedorModel).get_or_404(id)
-        data = request.get_json().items()
-        for key, value in data:
-            setattr(proveedor, key, value)
-        try:
-            db.session.add(proveedor)
-            db.session.commit()
-            return proveedor.to_json(), 201
-        except:
-            return '', 404
+        proveedor = db.session.query(UsuarioModel).get_or_404(id)
+        if proveedor.role == 'proveedor':
+            data = request.get_json().items()
+            for key, value in data:
+                setattr(proveedor, key, value)
+            try:
+                db.session.add(proveedor)
+                db.session.commit()
+                return proveedor.to_json(), 201
+            except:
+                return '', 404
+        else:
+            return 'proveedor not found', 404
+
+    @admin_required
     def delete(self, id):
-        try:
-            proveedor = db.session.query(ProveedorModel).get_or_404(id)
-            db.session.delete(proveedor)
-            db.session.commit()
-            return '', 204
-        except:
-            return '', 404
+        proveedor = db.session.query(UsuarioModel).get_or_404(id)
+        if proveedor.role == 'proveedor':
+            try:
+                db.session.delete(proveedor)
+                db.session.commit()
+                return '', 204
+            except:
+                return '', 404
+        else:
+            return 'proveedor not found', 404
 
 class Proveedores(Resource):
+    @jwt_required(optional=True)
     def get(self):
-        proveedores = db.session.query(ProveedorModel).all()
-        return jsonify([proveedor.to_json() for proveedor in proveedores])
+        page = 1
+        per_page = 10
+        proveedores = db.session.query(UsuarioModel).filter(UsuarioModel.role == 'proveedor')
+        if request.get_json():
+            filters = request.get_json().items()
+            for key, value in filters:
+                if key == 'page':
+                    page = int(value)
+                elif key == 'per_page':
+                    per_page = int(value)
+        proveedores = proveedores.paginate(page, per_page, True, 30)
+
+        return jsonify({
+            'proveedores': [proveedor.to_json() for proveedor in proveedores.items],
+            'total': proveedores.total,
+            'pages': proveedores.pages,
+            'page': page
+        })
+
+    @admin_required
     def post(self):
+        proveedor = UsuarioModel.from_json(request.get_json())
+        proveedor.role = 'proveedor'
         try:
-            proveedor = ProveedorModel.from_json(request.get_json())
             db.session.add(proveedor)
             db.session.commit()
         except:

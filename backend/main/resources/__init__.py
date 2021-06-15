@@ -24,3 +24,6 @@ from .Proveedor import Proveedores as ProveedoresResource
 
 from .ProductosBolsones import ProductoBolson as ProductoBolsonResource
 from .ProductosBolsones import ProductoBolsones as ProductoBolsonesResource
+
+from .Usuario import Usuario as UsuarioResource
+from .Usuario import Usuarios as UsuariosResource

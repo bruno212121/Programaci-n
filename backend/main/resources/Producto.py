@@ -1,37 +1,53 @@
 from flask_restful import Resource
 from flask import request, jsonify
 from .. import db
-from main.models import ProductoModel, ProveedorModel
-
+from main.models import ProductoModel
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from main.auth.decorators import proveedor_required, proveedor_or_admin_required
+from flask_jwt_extended import jwt_required, get_jwt_identity
 
 class Producto(Resource):
+    @jwt_required(optional=True)
     def get(self, id):
         try:
             producto = db.session.query(ProductoModel).get_or_404(id)
             return producto.to_json()
         except:
             return '', 404
+
+    @proveedor_required
     def put(self, id):
+        current_user = get_jwt_identity()
         producto = db.session.query(ProductoModel).get_or_404(id)
-        data = request.get_json().items()
-        for key, value in data:
-            setattr(producto, key, value)
-        try:
-            db.session.add(producto)
-            db.session.commit()
-            return producto.to_json(), 201
-        except:
-            return '', 404
+        if current_user['usuarioId'] == producto.usuarioId:
+            data = request.get_json().items()
+            for key, value in data:
+                setattr(producto, key, value)
+            try:
+                db.session.add(producto)
+                db.session.commit()
+                return producto.to_json(), 201
+            except:
+                return '', 404
+        else:
+            return 'Unauthorized', 401
+
+    @proveedor_or_admin_required
     def delete(self, id):
-        try:
-            producto = db.session.query(ProductoModel).get_or_404(id)
-            db.session.delete(producto)
-            db.session.commit()
-            return '', 204
-        except:
-            return '', 404
+        current_user = get_jwt_identity()
+        producto = db.session.query(ProductoModel).get_or_404(id)
+        if current_user['usuarioId'] == producto.usuarioId or current_user['role'] == 'admin':
+            try:
+                db.session.delete(producto)
+                db.session.commit()
+                return '', 204
+            except:
+                return '', 404
+        else:
+            return 'Unauthorized', 401
 
 class Productos(Resource):
+    @proveedor_or_admin_required
     def get(self):
 
         page = 1
@@ -40,8 +56,8 @@ class Productos(Resource):
         if request.get_json():
             filters = request.get_json().items()
             for key, value in filters:
-                if key == "proveedorId":
-                    productos = productos.filter(ProductoModel.proveedorId == value)
+                if key == "usuarioId":
+                    productos = productos.filter(ProductoModel.usuarioId == value)
                 elif key == 'page':
                     page = int(value)
                 elif key == 'per_page':
@@ -56,6 +72,7 @@ class Productos(Resource):
             'page': page
         })
 
+    @proveedor_required
     def post(self):
         try:
             producto = ProductoModel.from_json(request.get_json())
