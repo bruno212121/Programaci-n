@@ -6,9 +6,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_jwt_extended import JWTManager
 
 api = Api()
-
 db = SQLAlchemy()
-
 jwt = JWTManager()
 
 def create_app():
@@ -51,8 +49,8 @@ def create_app():
     api.add_resource(resources.ProductoBolsonesResource, '/productobolsones')
     api.add_resource(resources.ProductoBolsonResource, '/productobolson/<id>')
 
-    api.add_resource(resources.UsuariosResource, '/usuarios')
-    api.add_resource(resources.UsuarioResource, '/usuario/<id>')
+    #api.add_resource(resources.UsuariosResource, '/usuarios')
+    #api.add_resource(resources.UsuarioResource, '/usuario/<id>')
 
     api.init_app(app)
 

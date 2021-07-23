@@ -75,10 +75,9 @@ class Proveedores(Resource):
     @admin_required
     def post(self):
         proveedor = UsuarioModel.from_json(request.get_json())
-        proveedor.role = 'proveedor'
         try:
             db.session.add(proveedor)
             db.session.commit()
+            return proveedor.to_json(), 201
         except:
-            return '', 404
-        return proveedor.to_json(), 201
+            return 'Provider could not be created', 404

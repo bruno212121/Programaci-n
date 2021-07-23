@@ -1,5 +1,5 @@
 from .. import jwt
-from flask import jsonify
+#from flask import jsonify
 from flask_jwt_extended import verify_jwt_in_request, get_jwt
 from functools import wraps
 
@@ -75,6 +75,6 @@ def add_claims_to_access_token(usuario):
     claims = {
         'role': usuario.role,
         'id': usuario.id,
-        'email': usuario.email
+        'mail': usuario.mail
     }
     return claims
